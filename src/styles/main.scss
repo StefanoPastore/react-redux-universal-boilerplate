@@ -1,0 +1,17 @@
+:global {
+
+   .playground-wrapper {
+    height: 100vh;
+    box-sizing: border-box;
+    padding: 32px;
+    overflow: auto;
+  }
+
+  .playground-wrapper__header {
+    border-bottom: 1px solid #fff;
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+  }
+
+  .playground-wrapper__content {}
+}
