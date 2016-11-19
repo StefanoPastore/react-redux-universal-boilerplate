@@ -6,7 +6,7 @@ module.exports = {
     loaders: [
       {
         test: /\.(scss|css)$/,
-        loader: 'style-loader!css-loader?minimize&sourceMap&modules&importLoaders=2&localIdentName=[local]___[hash:base64:5]!postcss-loader!sass-loader',
+        loader: 'style-loader!css-loader?minimize&sourceMap&modules&importLoaders=1&localIdentName=[local]___[hash:base64:5]!postcss-loader!sass-loader',
       },
     ],
   },
