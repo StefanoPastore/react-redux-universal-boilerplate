@@ -25,7 +25,7 @@ This is a starter boilerplate app I've put together using the following technolo
 
 ### Installation
 ```
-npm i
+yarn
 docker-compose build
 ```
 
@@ -50,7 +50,7 @@ Files `src/styles/settings/variables` and `src/styles/settings/palette` must exi
 ### DEVELOPMENT
 All changes in development mode will applied in real time.
 
-To update or install node modules launch `docker ps` get **CONTAINER ID** and launch `docker exec -it [CONTAINER ID] bash`, now we can launch `npm i -S [module]` and we have new/updated module in container.
+To update or install node modules launch `docker-compose exec web bash` when container is up, now we can launch `yarn [add|upgrade] [package]` and we have new/updated module in container, in package.json and in yarn.lock.
 
 ## ATTENTION
 Always check the process isn't stopped when server files are changed, in case repeat `run app` actions.
