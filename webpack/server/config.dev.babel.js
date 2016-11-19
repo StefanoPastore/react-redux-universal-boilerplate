@@ -1,7 +1,7 @@
 import webpack from 'webpack';
 import config from './config.babel';
 
-config.devtool = 'source-map';
+config.devtool = '#eval-source-map';
 
 config.entry.unshift(
 	'webpack/hot/poll?10'

@@ -20,12 +20,12 @@ export default {
         test: /\.jsx?$/,
         exclude: /node_modules(?!(\/webpack\/hot\/poll))/,
         loader: 'babel',
-        include: process.cwd()
+        include: process.cwd(),
       },
     ],
   },
   postcss: [getAutoprefixer({ browsers: ['last 2 versions'] }), precss],
   sassLoader: {
     data: sassGlobalData,
-  }
+  },
 };

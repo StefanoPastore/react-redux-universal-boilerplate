@@ -1,15 +1,12 @@
-import dotenv from 'dotenv';
 import path from 'path';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import common from '../common.babel';
 
-dotenv.config({ silent: true });
-
-process.env.envMap = (function(env){
+const envMap = ((env) => {
   const obj = {};
 
-  Object.keys(env).forEach(function(key) {
-    obj['process.env.' + key ] = JSON.stringify(env[key]);
+  Object.keys(env).forEach((key) => {
+    obj[`process.env.${key}`] = JSON.stringify(env[key]);
   });
 
   return obj;
@@ -39,13 +36,14 @@ export default {
       {
         test: /\.jpe?g$|\.gif$|\.png$|\.svg$/,
         loader: 'file',
-        query: { name: '[name].[ext]' }
+        query: { name: '[name].[ext]' },
       },
     ],
   },
   plugins: [
-    new ExtractTextPlugin("style.css", {
-        allChunks: true
-    })
+    new ExtractTextPlugin('style.css', {
+      allChunks: true,
+    }),
   ],
+  envMap,
 };

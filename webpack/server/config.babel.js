@@ -1,18 +1,17 @@
-import webpack from 'webpack';
 import path from 'path';
 import fs from 'fs';
 import common from '../common.babel';
 
-const whitelist = [];
+const whitelist = [
+  '@creatiweb/anubi',
+];
 
 const nodeModules = {};
 fs.readdirSync('node_modules')
-  .filter(function(x) {
-    return ['.bin'].indexOf(x) === -1;
-  })
-  .forEach(function(mod) {
+  .filter((x) => ['.bin'].indexOf(x) === -1)
+  .forEach((mod) => {
     if (whitelist.indexOf(mod) === -1) {
-      nodeModules[mod] = 'commonjs ' + mod;
+      nodeModules[mod] = `commonjs ${mod}`;
     }
   });
 nodeModules['webpack/hot/poll'] = 'commonjs webpack/hot/poll';
@@ -34,7 +33,7 @@ export default {
       ...common.module.loaders,
       {
         test: /\.(scss|css)$/,
-        loader: 'css-loader/locals?minimize&sourceMap&modules&importLoaders=2&localIdentName=[local]___[hash:base64:5]!postcss-loader!sass-loader'
+        loader: 'css-loader/locals?minimize&sourceMap&modules&importLoaders=2&localIdentName=[local]___[hash:base64:5]!postcss-loader!sass-loader',
       },
       {
         test: /\.jpe?g$|\.gif$|\.png$|\.svg$/,
@@ -42,7 +41,7 @@ export default {
         query: {
           name: '[name].[ext]',
           emitFile: false,
-        }
+        },
       },
     ],
   },
