@@ -1,26 +1,29 @@
-FROM node:6.4
+FROM node:6.9
 
-# Create app user
-RUN useradd --user-group --create-home --shell /bin/false app
-
-# Set HOME ENV
-ENV HOME=/home/app
+# Create app user and install yarn
+RUN mkdir /app && \
+    useradd -m --user-group --shell /bin/false app && \
+    npm install -g --progress=false yarn
 
 # Install app dependencies
-COPY package.json npm-shrinkwrap.json $HOME/app/
-RUN chown -R app:app $HOME/*
+COPY package.json yarn.lock .npmrc /app/
+RUN chown -R app:app /app
 
-# Set user and Workdir to /home/app/app
+# Set user and Workdir to /app
 USER app
-WORKDIR /home/app/app
+WORKDIR /app
+
+#Set ENV
+ARG NODE=production
+ENV NODE_ENV ${NODE}
 
 # Install modules
-RUN npm install
+RUN yarn
 
 # Copy app sources
 USER root
-COPY . $HOME/app
-RUN chown -R app:app $HOME/*
+COPY . /app/
+RUN chown -R app:app /app
 USER app
 
 EXPOSE 3000

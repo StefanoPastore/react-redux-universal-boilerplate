@@ -1,1 +1,10 @@
+assets/
 node_modules/
+playground/
+src/
+webpack/
+Dockerfile
+docker-compose.yml
+README.md
+.*
+!.npmrc
