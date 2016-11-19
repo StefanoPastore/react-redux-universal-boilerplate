@@ -1,6 +1,5 @@
 import i18next from 'i18next';
 import LngDetector from 'i18next-browser-languagedetector';
-import merge from 'lodash.merge';
 import root from '../utils/root';
 const resources = require('i18next-resource-store-loader!../langs/index.js');
 
