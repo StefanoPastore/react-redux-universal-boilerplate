@@ -44,6 +44,7 @@
     "isomorphic-fetch": "^2.2.1",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
+    "react-helmet": "^3.2.2",
     "react-i18next": "^1.10.0",
     "react-redux": "^4.4.5",
     "react-resolver": "^3.0.3",
