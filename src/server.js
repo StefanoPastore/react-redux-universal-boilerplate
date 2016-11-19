@@ -1,4 +1,3 @@
-require('babel-register')();
 import 'babel-polyfill';
 import 'isomorphic-fetch';
 import './config/i18n';
