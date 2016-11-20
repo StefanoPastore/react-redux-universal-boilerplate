@@ -1,14 +1,16 @@
 import { createStore, compose, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
+import { routerMiddleware } from 'react-router-redux';
+import { reduxUniversalRenderMiddleware } from 'redux-universal-render';
 import rootReducer from './rootReducer';
-import root from './root';
+import root from '../utils/root';
 
-export default function configureStore(initialState = {}) {
+export default function configureStore(history, initialState = {}) {
   const store = createStore(
     rootReducer,
     initialState,
     compose(
-      applyMiddleware(thunk),
+      applyMiddleware(reduxUniversalRenderMiddleware, thunk, routerMiddleware(history)),
       (root.devToolsExtension && process.env.NODE_ENV === 'development') ?
         root.devToolsExtension() : f => f
     )
