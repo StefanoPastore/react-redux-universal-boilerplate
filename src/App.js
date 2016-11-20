@@ -1,20 +1,10 @@
-import './utils/serverMonkeyPatching'; // MUST BE ON TOP
 import express from 'express';
 import path from 'path';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import webpackClientConfig from '../webpack/client/config.dev.babel.js';
-import React from 'react';
-import { Provider } from 'react-redux';
-import { match, RouterContext } from 'react-router';
-import { renderToString, renderToStaticMarkup } from 'react-dom/server';
-import { Resolver } from 'react-resolver';
-import i18next from 'i18next';
-import { I18nextProvider } from 'react-i18next';
-import { StyleSheetServer } from 'aphrodite';
-import configureStore from './utils/configureStore';
-
+import { createMemoryHistory, match, RouterContext } from 'react-router';
 class App {
   hotDeps: {}
 
@@ -67,58 +57,45 @@ class App {
     app.use((req, res) => {
       global.logger.log('verbose', `Request received: ${req.originalUrl}`);
 
-      const store = configureStore();
+      const memoryHistory = createMemoryHistory(req.url);
+      const store = this.hotDeps.configureStore(memoryHistory);
+      const getRenderPage = this.hotDeps.renderPage(req, res);
 
-      match({
-        routes: this.hotDeps.getRoutes(store),
-        location: req.originalUrl,
-      }, (
-        error,
-        redirectLocation,
-        renderProps
-      ) => {
-        global.logger.log('verbose', `Parsed request: ${req.originalUrl}`);
-        if (redirectLocation) {
-          global.logger.log('verbose', `Redirect from ${req.originalUrl} to ${redirectLocation.pathname + redirectLocation.search}`);
-          res.redirect(redirectLocation.pathname + redirectLocation.search);
-        } else if (error) {
-          global.logger.log('alert', `ROUTER ERROR FOR ${req.originalUrl}`, error);
-          res.status(500);
-        } else if (renderProps) {
-          global.logger.log('verbose', `Request success ${req.originalUrl}`);
-          res.status(200);
+      (async () => {
+        const routes = this.hotDeps.getRoutes(store, memoryHistory);
+        const renderPage = getRenderPage(store);
 
-          const {
-            html: promise,
-            css,
-          } = StyleSheetServer.renderStatic(
-            () => Resolver
-              .resolve(
-                () => <Provider store={store}>
-                  <I18nextProvider i18n={i18next}>
-                    <RouterContext {...renderProps} />
-                  </I18nextProvider>
-                </Provider>
-              )
-          );
-
-          promise
-            .then(({ Resolved, data }) => {
-              const content = renderToString(<Resolved />);
-              const page = renderToStaticMarkup(<this.hotDeps.HTML content={content} store={store} data={data} css={css} />);
-
-              global.logger.log('info', `Send response for ${req.originalUrl}`);
-              res.send(`<!doctype html>\n${page}`);
-            })
-            .catch((err) => {
-              global.logger.log('error', `ASYNC ACTIONS FOR ${req.originalUrl}`, err);
-              res.status(500).send('Server error!');
-            });
-        } else {
-          global.logger.log('debug', `Request not found ${req.originalUrl}`);
-          res.status(404).send('Not found');
-        }
-      });
+        match({
+          routes,
+          location: req.originalUrl,
+        }, (
+          error,
+          redirectLocation,
+          renderProps
+        ) => {
+          global.logger.log('verbose', `Parsed request: ${req.originalUrl}`);
+          if (redirectLocation) {
+            global.logger.log('verbose', `Redirect from ${req.originalUrl} to ${redirectLocation.pathname + redirectLocation.search}`);
+            res.redirect(301, redirectLocation.pathname + redirectLocation.search);
+          } else {
+            if (error) {
+              global.logger.log('alert', `ROUTER ERROR FOR ${req.originalUrl}`, error);
+              res.status(500);
+              store.dispatch(this.hotDeps.statusActions.setCrash());
+              renderPage(this.hotDeps.AppContainer);
+            } else if (renderProps) {
+              const notFound = this.hotDeps.statusSelectors.notFound(store.getState());
+              global.logger.log('verbose', `Request ${notFound ? 'not found route' : 'success'} ${req.originalUrl}`);
+              res.status(!notFound ? 200 : 404);
+              renderPage(RouterContext, renderProps);
+            } else {
+              res.status(404);
+              store.dispatch(this.hotDeps.statusActions.setNotFound());
+              renderPage(this.hotDeps.AppContainer);
+            }
+          }
+        });
+      })();
     });
 
     this.server = app.listen(

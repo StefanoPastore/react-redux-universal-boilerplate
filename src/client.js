@@ -1,37 +1,47 @@
 import 'babel-polyfill';
 import 'isomorphic-fetch';
 import React from 'react';
-import { unmountComponentAtNode } from 'react-dom';
-import { Resolver } from 'react-resolver';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
+import { browserHistory, match, Router } from 'react-router';
+import { syncHistoryWithStore } from 'react-router-redux';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import i18next from 'i18next';
 import { I18nextProvider } from 'react-i18next';
 import { StyleSheet } from 'aphrodite';
 import './config/i18n';
 import './styles/main';
-import configureStore from './utils/configureStore';
-import root from './utils/root';
+import configureStore from './config/configureStore';
+
+window.logger = (process.env.NODE_ENV === 'development' ? console : { log: () => {} });
 
 injectTapEventPlugin();
 
-const preloadedState = root.__PRELOADED_STATE__;
-const cssToRehydrate = root.__CSS_REHYDRATE__;
+const preloadedState = window.__PRELOADED_STATE__;
+const cssToRehydrate = window.__CSS_REHYDRATE__;
 
-const store = configureStore(preloadedState);
+const store = configureStore(browserHistory, preloadedState);
+const history = syncHistoryWithStore(browserHistory, store);
+
+if (process.env.NODE_ENV === 'production') {
+  history.listen(location => window.ga('send', 'pageview', location.pathname));
+}
+
 StyleSheet.rehydrate(cssToRehydrate);
 
 let getRoutes = require('./config/routes').default;
 const rootElement = document.getElementById('root');
 
-const renderApp = () => Resolver.render(
-  () => <Provider store={store}>
+const routes = getRoutes(store, history);
+
+const renderApp = () => match({ history, routes }, (error, redirectLocation, renderProps) => render(
+  <Provider store={store}>
     <I18nextProvider i18n={i18next}>
-      {getRoutes(store)}
+      <Router {...renderProps} />
     </I18nextProvider>
   </Provider>,
   document.getElementById('root')
-);
+));
 
 if (module.hot) {
   const style = document.getElementById('styles');

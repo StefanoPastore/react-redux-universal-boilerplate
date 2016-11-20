@@ -6,18 +6,27 @@ import fs from 'fs';
 import path from 'path';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import checkEnv from './utils/checkEnv';
+import renderPage from './utils/renderPage';
 import getRoutes from './config/routes';
-import { HTML } from './layouts/HTML';
+import { AppContainer } from './layouts';
+import configureStore from './config/configureStore';
+import {
+  actions as statusActions,
+  selectors as statusSelectors,
+} from './modules/Status';
 let App = require('./App').default;
 
 checkEnv();
 
 injectTapEventPlugin();
-
 let app = new App();
 app.hotDeps = {
   getRoutes,
-  HTML,
+  AppContainer,
+  configureStore,
+  statusActions,
+  statusSelectors,
+  renderPage,
 };
 app.start();
 
@@ -52,15 +61,24 @@ if (process.env.NODE_ENV === 'development') {
     };
 
     module.hot.accept('./config/routes', () => {
-      global.logger.log('info', 'Please refresh page if it is open');
-
       app.hotDeps.getRoutes = require('./config/routes').default;
     });
 
-    module.hot.accept('./layouts/HTML', () => {
-      global.logger.log('info', 'Please refresh page if it is open');
+    module.hot.accept('./layouts', () => {
+      app.hotDeps.AppContainer = require('./layouts').AppContainer;
+    });
 
-      app.hotDeps.HTML = require('./layouts/HTML').HTML;
+    module.hot.accept('./config/configureStore', () => {
+      app.hotDeps.configureStore = require('./config/configureStore').default;
+    });
+
+    module.hot.accept('./modules/Status', () => {
+      app.hotDeps.statusActions = require('./modules/Status').actions;
+      app.hotDeps.statusSelectors = require('./modules/Status').selectors;
+    });
+
+    module.hot.accept('./utils/renderPage', () => {
+      app.hotDeps.renderPage = require('./utils/renderPage').default;
     });
 
     module.hot.accept('./App', () => {
