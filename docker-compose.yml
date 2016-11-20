@@ -1,23 +1,18 @@
-version: '2'
-services:
-  web:
-    build:
-      context: .
-      args:
-        NODE: development
-    ports:
-      - 3000:3000
-    environment:
-      - "APP_NAME=camping.pl"
-      - "PROTOCOL=http"
-      - "HOST=localhost"
-      - "PORT=3000"
-      - "NODE_ENV=development"
-      - "GRAYLOG_NAME="
-      - "GRAYLOG_HOST="
-      - "GRAYLOG_LEVEL="
-      - "GRAYLOG_PORT="
-    volumes:
-      - .:/app/
-      - /app/node_modules
-    command: npm run start
+web:
+  build: .
+  ports:
+    - 3000:3000
+  environment:
+    - "APP_NAME=Hello World"
+    - "PROTOCOL=http"
+    - "HOST=localhost"
+    - "PORT=3000"
+    - "NODE_ENV=development"
+    - "GRAYLOG_NAME="
+    - "GRAYLOG_HOST="
+    - "GRAYLOG_LEVEL="
+    - "GRAYLOG_PORT="
+  volumes:
+    - .:/home/app/app
+    - /home/app/app/node_modules
+  command: bash -c "yarn && npm run start"
